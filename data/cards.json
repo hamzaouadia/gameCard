@@ -1,0 +1,27 @@
+[
+  {
+    "id": 1,
+    "type": "truth",
+    "text": "Translate to German: 'I am extremely hungry.' If you fail, eat a slice of lemon."
+  },
+  {
+    "id": 2,
+    "type": "dare",
+    "text": "Speak only in a heavy German accent until your next turn. If you break character, take a hit."
+  },
+  {
+    "id": 3,
+    "type": "truth",
+    "text": "Name 5 German foods in 10 seconds. Pass: immune next round. Fail: someone else gets to pick a dare for you."
+  },
+  {
+    "id": 4,
+    "type": "dare",
+    "text": "Try to pronounce 'Streichholzschächtelchen' (little matchbox) perfectly. If the group votes you failed, you drink."
+  },
+  {
+    "id": 5,
+    "type": "truth",
+    "text": "How do you ask 'Where is the bathroom?' in German? If you get it wrong, you cannot use the bathroom for 1 hour."
+  }
+]
