@@ -1,98 +1,125 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import { useState } from 'react';
+import { Alert, Button, StyleSheet, Text, TextInput, View } from 'react-native';
+import { createRoom, joinRoom } from '../../services/supabase';
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+  const [roomInfo, setRoomInfo] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [roomCodeInput, setRoomCodeInput] = useState('');
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+  const handleTestCreateRoom = async () => {
+    setLoading(true);
+    try {
+      const result = await createRoom('TestHostPlayer');
+      setRoomInfo(result);
+      Alert.alert("Supabase Success! 🎉", `Room created with code: ${result.room.room_code}`);
+    } catch (error) {
+      Alert.alert("Supabase Error ❌", error.message);
+      console.error("Supabase Error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleTestJoinRoom = async () => {
+    if (!roomCodeInput) {
+      Alert.alert("Wait!", "Please enter a 5-character room code first.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Testing with a mock guest player
+      const result = await joinRoom(roomCodeInput.toUpperCase(), 'TestGuestPlayer');
+      setRoomInfo(result);
+      Alert.alert("Supabase Success! 🎉", `Successfully joined room: ${result.room.room_code}`);
+      setRoomCodeInput(''); // Clear the input after success
+    } catch (error) {
+      Alert.alert("Supabase Error ❌", "Room not found or couldn't insert player. Did you type the exact code?");
+      console.error("Supabase Error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Backend Connection Test</Text>
+
+      <Button
+        title={loading ? "Loading..." : "1. Test Create Room"}
+        onPress={handleTestCreateRoom}
+        disabled={loading}
+      />
+
+      <View style={styles.divider} />
+
+      <TextInput
+        style={styles.input}
+        placeholder="Enter Room Code (e.g. ABCDE)"
+        value={roomCodeInput}
+        onChangeText={setRoomCodeInput}
+        autoCapitalize="characters"
+        maxLength={5}
+      />
+
+      <Button
+        title={loading ? "Loading..." : "2. Test Join Room"}
+        onPress={handleTestJoinRoom}
+        disabled={loading || !roomCodeInput}
+        color="#2196F3"
+      />
+
+      {roomInfo && (
+        <View style={styles.result}>
+          <Text style={styles.bold}>Latest Database Result:</Text>
+          <Text>Room ID: {roomInfo.room.id.substring(0, 8)}...</Text>
+          <Text>Room Code: {roomInfo.room.room_code}</Text>
+          <Text>Player Inserted: {roomInfo.player.player_name}</Text>
+        </View>
+      )}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
+  container: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
-    gap: 8,
+    padding: 20,
+    backgroundColor: '#fff'
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  divider: {
+    height: 1,
+    width: '80%',
+    backgroundColor: '#ccc',
+    marginVertical: 30
   },
+  input: {
+    width: '80%',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 12,
+    marginBottom: 15,
+    borderRadius: 8,
+    textAlign: 'center',
+    fontSize: 16
+  },
+  result: {
+    marginTop: 30,
+    padding: 15,
+    backgroundColor: '#e6f7ff',
+    borderRadius: 8,
+    width: '100%'
+  },
+  bold: {
+    fontWeight: 'bold',
+    marginBottom: 10
+  }
 });
