@@ -65,3 +65,23 @@ If GitHub says "This branch has conflicts that must be resolved":
     git push origin your-branch-name
     ```
 6.  The PR is now ready to merge!
+
+## 🧾 7. File Responsibility Signature (Required)
+To keep the codebase structured and accountable, every file that is created or heavily modified in a feature branch must have a clear owner and scope.
+
+Add this short header at the top of the file:
+
+```ts
+/**
+ * File Responsibility
+ * Owner: Frontend | Backend
+ * Scope: short sentence describing what this file owns
+ */
+```
+
+Rules:
+
+*   One clear owner per file during a feature cycle.
+*   If ownership changes, update the header in the same PR.
+*   Keep scope specific (UI only, data access only, realtime only, etc.).
+*   During code review, reviewer must check that the header is present and matches the file content.

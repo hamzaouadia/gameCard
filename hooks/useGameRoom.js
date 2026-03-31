@@ -1,6 +1,17 @@
+/**
+ * File Responsibility
+ * Owner: Backend
+ * Scope: Realtime subscription hooks for room state and players list.
+ */
+
 import { useEffect, useState } from 'react';
 import { supabase } from '../services/supabase';
 
+/**
+ * Returns live room state for a given room ID.
+ * @param {string|number|null|undefined} roomId - Room identifier.
+ * @returns {object|null}
+ */
 export const useRoomState = (roomId) => {
     const [room, setRoom] = useState(null);
 
@@ -30,6 +41,11 @@ export const useRoomState = (roomId) => {
     return room;
 };
 
+/**
+ * Returns a live, ordered list of players in a room.
+ * @param {string|number|null|undefined} roomId - Room identifier.
+ * @returns {Array<object>}
+ */
 export const usePlayersList = (roomId) => {
     const [players, setPlayers] = useState([]);
 
